@@ -1,0 +1,90 @@
+// undefine_key(default_global_keymap, "q");
+homepage = "http://www.google.com";
+// auto completion in the minibuffer
+minibuffer_auto_complete_default = true;
+url_completion_use_history = true;
+url_completion_use_bookmarks = true;
+
+// can_kill_last_buffer = false;
+
+//allow for 'contrib' stuff
+load_paths.unshift("chrome://conkeror-contrib/content/");
+
+add_hook("window_before_close_hook",
+         function (w) {
+             var result = yield w.minibuffer.read_single_character_option(
+                 $prompt = "Close window? (y/n)",
+                 $options = ["y", "n"]);
+             yield co_return(result == "y");
+
+         });
+
+// give me new tabs; open buffers (tabs) in the background
+require("new-tabs.js");
+require("clicks-in-new-buffer.js");
+clicks_in_new_buffer_target = OPEN_NEW_BUFFER_BACKGROUND; 
+clicks_in_new_buffer_button = 1; //  midclick links in new buffers with
+
+// some bookmarks
+define_webjump("conk",  "http://conkeror.org");
+define_webjump("efu",   "http://emacs-fu.blogspot.com");
+define_webjump("lkml",  "http://lkml.org");
+define_webjump("ew",    "http://emacswiki.org");
+
+define_webjump("so",    "http://stackoverflow.com/search?q=%s");
+define_webjump("yts",   "http://www.youtube.com/results?search_query=%s&aq=f");
+define_webjump("imbd",  "http://www.imdb.com/find?s=all&q=%s");
+
+editor_shell_command = "emacsclient -c";
+session_pref("xpinstall.whitelist.required", false);
+
+
+define_key(default_global_keymap, "M-f", "follow-new-buffer");
+define_key(default_global_keymap, "C-M-f", "follow-new-buffer-background");
+
+interactive("copy-url",
+        "Copy the current buffer's URL to the clipboard",
+        function(I) {
+            var text = I.window.buffers.current.document.location.href;
+            writeToClipboard(text);
+            I.window.minibuffer.message("copied: " + text);
+        }
+);
+define_key(default_global_keymap, "C-c u", "copy-url");
+
+// reload conkerorrc with C-c r
+interactive("reload-config", "reload conkerorrc",
+       function(I) {
+          load_rc();
+          I.window.minibuffer.message("config reloaded");
+       }
+);
+define_key(default_global_keymap, "C-c r", "reload-config");
+
+// when called externally just open a new tab
+url_remoting_fn = load_url_in_new_buffer;
+download_buffer_automatic_open_target = OPEN_NEW_BUFFER_BACKGROUND;
+
+// org-protocol stuff
+function org_capture (url, title, selection, window) {
+    var cmd_str =
+        'emacsclient \"org-protocol:/capture:/w/'+url+'/'+title+'/'+selection+'\"';
+    if (window != null) {
+      window.minibuffer.message('Issuing ' + cmd_str);
+    }
+    shell_command_blind(cmd_str);
+}
+
+interactive("org-capture", "Clip url, title, and selection to capture via org-protocol",
+          function (I) {
+              org_capture(encodeURIComponent(I.buffer.display_uri_string),
+                        encodeURIComponent(I.buffer.document.title),
+                                encodeURIComponent(I.buffer.top_frame.getSelection()),
+                        I.window);
+          });
+// capture with C-c c
+define_key(content_buffer_normal_keymap, "C-c c", "org-capture");
+
+// Local Variables:
+// mode: js
+// End:
