@@ -65,6 +65,9 @@ define_key(default_global_keymap, "C-c r", "reload-config");
 url_remoting_fn = load_url_in_new_buffer;
 download_buffer_automatic_open_target = OPEN_NEW_BUFFER_BACKGROUND;
 
+// use sessions
+require("session.js");
+
 // org-protocol stuff
 function org_capture (url, title, selection, window) {
     var cmd_str =
