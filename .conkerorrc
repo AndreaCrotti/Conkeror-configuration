@@ -22,7 +22,7 @@ add_hook("window_before_close_hook",
 // give me new tabs; open buffers (tabs) in the background
 require("new-tabs.js");
 require("clicks-in-new-buffer.js");
-clicks_in_new_buffer_target = OPEN_NEW_BUFFER_BACKGROUND; 
+clicks_in_new_buffer_target = OPEN_NEW_BUFFER_BACKGROUND;
 clicks_in_new_buffer_button = 1; //  midclick links in new buffers with
 
 // some bookmarks
@@ -41,6 +41,8 @@ session_pref("xpinstall.whitelist.required", false);
 
 define_key(default_global_keymap, "M-f", "follow-new-buffer");
 define_key(default_global_keymap, "C-M-f", "follow-new-buffer-background");
+
+view_source_use_external_editor = true;
 
 interactive("copy-url",
         "Copy the current buffer's URL to the clipboard",
