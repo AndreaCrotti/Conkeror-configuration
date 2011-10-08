@@ -90,6 +90,30 @@ interactive("org-capture", "Clip url, title, and selection to capture via org-pr
 // capture with C-c c
 define_key(content_buffer_normal_keymap, "C-c c", "org-capture");
 
+// block flash content
+require("content-policy.js");
+
+function block_flash (content_type, content_location) {
+    var Y = content_policy_accept, N = content_policy_reject;
+    var action = ({ "homestarrunner.com":Y }
+                  [content_location.host] || N);
+    if (action == N)
+        dumpln("blocked flash: "+content_location.spec);
+    return action;
+}
+content_policy_bytype_table.object = block_flash;
+
+// 4.1.1. content_policy_bytype_table
+
+// By-type filtering is configured in content_policy_bytype_table. The table has 14 named slots for the 14 content types. Each slot can be set to a content_policy_hook function to be called by content_policy_bytype when a request of that type comes through. The 14 types are, (1: other, 2: script, 3: image, 4: stylesheet, 5: object, 6: document, 7: subdocument, 9: xbl, 10: ping, 11: xmlhttprequest, 12: object_subrequest, 13: dtd, 14: font, 15: media). Note the absence of number 8. It will never occur. 
+
+add_hook("content_policy_hook", content_policy_bytype);
+
+// very simple image blocker
+// require("content-policy.js");
+// content_policy_bytype_table.image = function () content_policy_reject;
+// add_hook("content_policy_hook", content_policy_bytype);
+
 // Local Variables:
 // mode: js
 // End:
